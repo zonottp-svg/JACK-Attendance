@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ព្រីនស្លាក QR Code វត្តមានរោងចក្រ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    @media print {
+      body { background: white !important; padding: 0 !important; }
+      .no-print { display: none !important; }
+      .print-area { border: 4px solid #1e293b !important; box-shadow: none !important; margin: 0 auto !important; width: 100% !important; max-width: 650px !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen p-4 md:p-8 font-sans flex flex-col items-center">
+
+  <!-- ផ្ទាំងបញ្ជា (លាក់ពេលព្រីន) -->
+  <div class="no-print bg-white p-6 rounded-2xl shadow-md w-full max-w-xl mb-6 border border-gray-200">
+    <h2 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+      ⚙️ ការកំណត់ស្លាក QR Code រោងចក្រ
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">ឈ្មោះរោងចក្រ / សហគ្រាស</label>
+        <input type="text" id="factoryNameInput" value="រោងចក្រកាត់ដេរ ជោគជ័យ" oninput="updatePoster()" class="w-full px-3 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 font-semibold text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">ឈ្មោះច្រកទ្វារ (Gate)</label>
+        <input type="text" id="gateNameInput" value="ច្រកទ្វារធំទី ១ (GATE 1)" oninput="updatePoster()" class="w-full px-3 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 font-semibold text-sm">
+      </div>
+    </div>
+    <div class="mb-4">
+      <label class="block text-xs font-semibold text-gray-600 mb-1">លេខកូដ QR សម្ងាត់ (ត្រូវដូចក្នុង Apps Script)</label>
+      <input type="text" id="qrTextInput" value="FACTORY_GATE_MAIN_2026" oninput="updatePoster()" class="w-full px-3 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 font-mono font-bold text-sm bg-gray-50">
+    </div>
+
+    <!-- ប៊ូតុងបញ្ជា -->
+    <div class="flex gap-3">
+      <button onclick="window.print()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow transition flex items-center justify-center gap-2">
+        🖨️ ព្រីនលើក្រដាស A4
+      </button>
+      <button onclick="downloadQR()" class="bg-gray-800 hover:bg-black text-white font-bold py-2.5 px-4 rounded-xl shadow transition flex items-center justify-center gap-2">
+        💾 ទាញយករូប QR
+      </button>
+    </div>
+  </div>
+
+  <!-- ស្លឹកប័ណ្ណ A4 សម្រាប់ព្រីន (Printable Poster) -->
+  <div class="print-area bg-white p-8 md:p-12 rounded-3xl shadow-xl w-full max-w-xl text-center border-4 border-slate-800 flex flex-col items-center">
+    
+    <!-- ក្បាលស្លាក -->
+    <div class="border-b-2 border-dashed border-gray-300 pb-4 w-full mb-6">
+      <h1 id="factoryTitle" class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-wide mb-1">
+        រោងចក្រកាត់ដេរ ជោគជ័យ
+      </h1>
+      <span id="gateTitle" class="inline-block bg-indigo-100 text-indigo-800 font-bold px-4 py-1 rounded-full text-sm mt-1">
+        ច្រកទ្វារធំទី ១ (GATE 1)
+      </span>
+    </div>
+
+    <p class="text-gray-600 font-bold text-base md:text-lg mb-4">
+      សូមស្កេន QR Code ដើម្បីកត់ត្រាវត្តមាន ចូល / ចេញ
+    </p>
+
+    <!-- កន្លែងបង្ហាញ QR Code កម្រិតច្បាស់ -->
+    <div class="p-4 bg-white rounded-2xl border-2 border-gray-800 shadow-inner my-2">
+      <div id="qrcode"></div>
+    </div>
+
+    <!-- ការណែនាំកម្មករ -->
+    <div class="mt-6 bg-slate-50 p-4 rounded-xl border border-gray-200 w-full text-left">
+      <h3 class="font-bold text-gray-800 text-sm mb-2 flex items-center gap-1.5">
+        📌 របៀបស្កេនវត្តមាន៖
+      </h3>
+      <ol class="text-xs text-gray-600 space-y-1.5 list-decimal list-inside font-medium">
+        <li>បើក <b>App វត្តមាន</b> លើទូរស័ព្ទដៃរបស់អ្នក</li>
+        <li>ជ្រើសរើស <b>ស្កេនចូល (IN)</b> ឬ <b>ស្កេនចេញ (OUT)</b></li>
+        <li>ចុច <b>បើកកាមេរ៉ាស្កេន</b> តម្រង់មកលើ QR Code នេះ</li>
+        <li>មើលចំកាមេរ៉ាមុខដើម្បី <b>ថតរូប Selfie បញ្ជាក់មុខ</b> ជាការស្រេច។</li>
+      </ol>
+    </div>
+
+    <div class="mt-6 text-[10px] text-gray-400 font-mono tracking-widest uppercase">
+      SMART FACTORY ATTENDANCE SYSTEM • POWERED BY VERIFIED AI
+    </div>
+  </div>
+
+  <script>
+    let qrcodeObj = null;
+
+    function renderQR(text) {
+      const qrContainer = document.getElementById("qrcode");
+      qrContainer.innerHTML = "";
+      qrcodeObj = new QRCode(qrContainer, {
+        text: text,
+        width: 260,
+        height: 260,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+
+    function updatePoster() {
+      const fName = document.getElementById("factoryNameInput").value.trim() || "ឈ្មោះរោងចក្រ";
+      const gName = document.getElementById("gateNameInput").value.trim() || "ច្រកទ្វារ";
+      const qrText = document.getElementById("qrTextInput").value.trim() || "FACTORY_GATE_MAIN_2026";
+
+      document.getElementById("factoryTitle").innerText = fName;
+      document.getElementById("gateTitle").innerText = gName;
+      renderQR(qrText);
+    }
+
+    function downloadQR() {
+      const img = document.querySelector("#qrcode img");
+      if (img && img.src) {
+        const link = document.createElement("a");
+        link.download = "Factory_QR_Code.png";
+        link.href = img.src;
+        link.click();
+      } else {
+        alert("សូមរង់ចាំ QR Code បង្ហាញសិន!");
+      }
+    }
+
+    // ចាប់ផ្តើមលើកដំបូង
+    updatePoster();
+  </script>
+</body>
+</html>
